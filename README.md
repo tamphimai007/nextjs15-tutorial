@@ -1,36 +1,209 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## Step 1 Install จ้า (roitai คือชื่อโฟลเดอร์)
 
-## Getting Started
-
-First, run the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```sh
+npx create-next-app@latest roitai
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## ถ้ามีเรื่อง
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```sh
+npm cache clean --force
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Routing
 
-## Learn More
+```plaintext
+/app
+  /about
+    /page.tsx          # http://localhost:3000/about
+  /info
+    /page.tsx          # http://localhost:3000/info
+          [id]         # [id] params folder
+            /page.tsx  # http://localhost:3000/info/123456
+  /_folder             # Private Folder (no public access)
+  /(auth)              # Groups Folder
+    /login
+        /page.tsx      # http://localhost:3000/login
+    /[...sign-in]         # params
+        /page.tsx      # http://localhost:3000/sign-in
+    /register
+        /page.tsx      # http://localhost:3000/register
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Step 2 Metadata
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```tsx
+import type { Metadata } from "next";
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+export const metadata: Metadata = {
+  title: "Roitai",
+  description: "Camping in Thailand.",
+  keywords: "Camping, Thailand, Roitai",
+};
+```
 
-## Deploy on Vercel
+### Step 3 Server Components
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Default เป็น Server Component
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- SEO ที่ดี (Search Engine Optimization)
+- ความปลอดภัย
+- Caching
+
+### Client Components
+
+### ถ้าจะใช้ต้องเพิ่ม 'use client'
+
+- Client Components สามารถใช้ state, effects และ event listeners
+- สามารถใช้ Browser APIs เช่น geolocation หรือ localStorage
+
+## Step 4 Fetch Data
+
+```tsx
+const url = "https://jsonplaceholder.typicode.com/todos";
+```
+
+### Loading...
+
+### Error
+
+### params
+
+### Image
+
+```tsx
+const url =
+  "https://fastly.picsum.photos/id/0/5000/3333.jpg?hmac=_j6ghY5fCfSD6tvtcV74zXivkJSPIfR9B8w34XeQmvU";
+```
+
+### next.config.ts
+
+```tsx
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
+  /* config options here */
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "fastly.picsum.photos",
+        pathname: "/**",
+      },
+    ],
+  },
+};
+
+export default nextConfig;
+```
+
+Next.js <Image /> component
+
+- ช่วยให้การจัดการภาพในเว็บไซต์มีประสิทธิภาพมากขึ้นโดยอัตโนมัติ
+- ปรับขนาดภาพให้เหมาะสม ลดการเลื่อนเลย์เอาต์ และเพิ่มความเร็วในการโหลดหน้าเว็บ
+
+# Step 6 Server Actions
+
+```tsx
+export default const ServerComponent =()=>{
+    const myAction = async(formData) =>{
+        'use server'
+            // จัดการข้อมูลจาก form -> formData.get('name')
+            // CRUD ข้อมูล -> mutate data (server)
+            // รีเฟรชข้อมูล -> revalidate cache
+    }
+
+    return <form action={myAction}>... </form>
+}
+```
+
+```tsx
+'use client'
+import { myAction } from './action'
+export default const ClientComponent = ()=>{
+    return (
+        <form action={myAction}>
+            <button type='submit'>Add </button>
+        </form>
+    )
+}
+
+```
+
+# actions.tsx
+
+```ts
+export const createCamp = async (formData) => {
+  // const firstName = formData.get('title')
+  // const description = formData.get('description')
+  const rawData = Object.fromEntries(formData);
+  console.log(rawData);
+  // db.camp.create({})
+  // revalidatePath('/actions') // refresh Data
+  // redirect('/')
+};
+
+export const fetchCamp = async () => {
+  // db.camp.findMany({})
+  const user = [
+    { id: 1, title: "Route 3060" },
+    { id: 2, title: "Korat" },
+  ];
+
+  return user;
+};
+```
+
+# https://react.dev/reference/react/useActionState
+
+```tsx
+const [state, formAction, isPending] = useActionState(fn, initialState, permalink?);
+```
+
+# https://react.dev/reference/react-dom/hooks/
+
+```tsx
+const { pending, data, method, action } = useFormStatus();
+```
+
+# Step 8 API
+```plaintext
+/api
+    /camp
+        /route.ts
+```
+```ts
+import { fetchCamp } from "@/utils/actions";
+import { NextResponse } from "next/server";
+
+export const GET = async (req: NextResponse) => {
+  const { searchParams } = new URL(req.url);
+  const id = searchParams.get("id");
+  console.log(id);
+
+  const camps = await fetchCamp();
+  //   return Response.json({ camps });
+  return NextResponse.redirect(new URL("/", req.url));
+};
+```
+
+# Step 9 Middleware
+```ts
+import { NextResponse } from "next/server";
+
+export function middleware(req: Request) {
+  console.log("hello middleware");
+  return NextResponse.redirect(new URL("/", req.url));
+}
+
+export const config = {
+  // matcher : '/counter'
+  matcher: ["/about/:path*", "/counter/:path*"],
+};
+```
+
+
+# Step 10 Type 
+- เมื่อไม่กำหนด type TypeScript จะมองว่า data เป็น any ซึ่งหมายความว่าไม่มีการตรวจสอบชนิดข้อมูลเลย
+- โค้ดอ่านง่ายขึ้น เพราะเห็นโครงสร้างข้อมูลชัดเจน
+- ลดข้อผิดพลาด เพราะ TypeScript ช่วยตรวจสอบและแนะนำการใช้งาน property
