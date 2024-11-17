@@ -69,7 +69,7 @@ const url = "https://jsonplaceholder.typicode.com/todos";
 
 ### params
 
-### Image
+### Step 5 Image
 
 ```tsx
 const url =
@@ -154,7 +154,7 @@ export const fetchCamp = async () => {
 };
 ```
 
-# https://react.dev/reference/react/useActionState
+# Step 7 https://react.dev/reference/react/useActionState
 
 ```tsx
 const [state, formAction, isPending] = useActionState(fn, initialState, permalink?);
